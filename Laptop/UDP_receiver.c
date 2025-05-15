@@ -8,7 +8,6 @@ Receive and send data.
 Disconnect.
  */
 
-
  
 int bind_socket(int port); //
 int received_packet(int sock, void* buffer, size_t size);
