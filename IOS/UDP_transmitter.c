@@ -10,13 +10,16 @@
 #include <netinet/in.h>     // for sockaddr_in
 #include <arpa/inet.h>      // for inet_pton(), htons(), etc.
 
+#define dest_ip "192.168.1.129"
+#define dest_port 8888
+
 /**
  * @brief Create a Socket object
  * 
- * @return the socket
+ * @return the socket; negative if failure.
  */
 int createSocket(){
-    int sock = create_socket();
+    int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     return sock;
 }
 
@@ -26,18 +29,23 @@ int createSocket(){
  * @param packet 
  */
 int transmitPacket(int sock, struct IMUPacket* packet) {
-    
-    //return 1 if failure
-    if (sock < 0) {
-        return 1;
+    //Define destination address:
+    struct sockaddr_in destAddr;
+    memset(&destAddr, 0, sizeof(destAddr)); //populate memory with 0s
+
+    destAddr.sin_family = AF_INET; //IPV4 address family
+    destAddr.sin_port = htons(dest_port); //network byte order conversion from port
+
+    //Internet presentation to network; IPV4 string -> string ip address into destAddr.sin_addr format (binary).
+    if (inet_pton(AF_INET, dest_ip, &destAddr.sin_addr) <= 0) { //IP-string to binary format
+        perror("Invalid IP address");
+        return -1;
     }
 
+    ssize_t sent = sendto(sock, packet, sizeof(*packet), 0,
+                          (struct sockaddr*)&destAddr, sizeof(destAddr)); //signed sizes that may exceed int limits
     
-    send_packet(sock, "192.168.1.50", 8888, &packet, sizeof(packet));
-    Sleep(10); // milliseconds between packets
-
-    
-    return 0;
+    return sent;
 }
 
 /**
@@ -46,6 +54,5 @@ int transmitPacket(int sock, struct IMUPacket* packet) {
  * @param sock: the socket to be closed
  */
 void closeSocket(int sock){
-    closesocket(sock);
-    WSACleanup();
+    close(sock);
 }

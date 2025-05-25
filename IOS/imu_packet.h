@@ -7,7 +7,7 @@ typedef struct {
 
 /**
  * @brief This quaternion is sent over to the source/laptop through 
- * UDP, and converted into Euler angles to be rendered in OPENGL.
+ * UDP, and converted into Euler angles to be rendered later.
  */
 typedef struct {
     float qw, qx, qy, qz;

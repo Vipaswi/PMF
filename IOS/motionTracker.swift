@@ -1,5 +1,9 @@
 import CoreMotion
 
+func createSocket() -> Int32;
+func closeSocket() -> Int32;
+func transmitPacket(_ sock: Int32, _ struct packet: UnsafePointer<IMUPacket>) -> Int64; //for 64 bit systems
+
 let motionManager = CMMotionManager()
 
 func startMotionUpdates() {

@@ -8,3 +8,18 @@
  * @copyright Copyright (c) 2025
  * 
  */
+#pragma once
+#include "imu_packet.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+ int createSocket();
+ int transmitPacket(int sock, struct IMUPacket* packet);
+ void closeSocket();
+
+ #ifdef __cplusplus
+}
+#endif
