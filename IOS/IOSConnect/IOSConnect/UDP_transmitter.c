@@ -9,6 +9,8 @@
 #include <sys/socket.h>     // socket(), sendto(), recvfrom()
 #include <netinet/in.h>     // for sockaddr_in
 #include <arpa/inet.h>      // for inet_pton(), htons(), etc.
+#include <string.h> //memset
+#include <stdio.h> //perror
 
 #define dest_ip "192.168.1.129"
 #define dest_port 8888
@@ -18,17 +20,19 @@
  * 
  * @return the socket; negative if failure.
  */
-int createSocket(){
+int createSocket(void){
     int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     return sock;
 }
 
 /**
  * @brief Transmit a single IMUPacket over the socket
- * 
- * @param packet 
+ *
+ * @param sock the socket id
+ * @param packet the packet address
+ *
  */
-int transmitPacket(int sock, struct IMUPacket* packet) {
+long transmitPacket(int sock, motionPacket* packet) {
     //Define destination address:
     struct sockaddr_in destAddr;
     memset(&destAddr, 0, sizeof(destAddr)); //populate memory with 0s
@@ -51,7 +55,7 @@ int transmitPacket(int sock, struct IMUPacket* packet) {
 /**
  * @brief Closes the socket and cleans it up
  * 
- * @param sock: the socket to be closed
+ * @param sock the socket to be closed
  */
 void closeSocket(int sock){
     close(sock);

@@ -17,8 +17,8 @@ extern "C" {
 
 
  int createSocket();
- int transmitPacket(int sock, struct IMUPacket* packet);
- void closeSocket();
+ long transmitPacket(int sock, motionPacket* packet);
+ void closeSocket(int sock);
 
  #ifdef __cplusplus
 }

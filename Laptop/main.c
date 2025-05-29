@@ -14,7 +14,7 @@ int main(){
   }
   
   int tracker = 0;
-  Quaternion* buffer = (Quaternion*) malloc(sizeof(Quaternion));
+  motionPacket* buffer = (motionPacket*) malloc(sizeof(motionPacket));
 
   if(buffer == NULL){
     perror("Buffer allocation failed");
@@ -22,8 +22,8 @@ int main(){
   }
 
   while(1){
-    received_packet(sock, buffer, sizeof(Quaternion));
-    printf("Quaternion: w=%.2f x=%.2f y=%.2f z=%.2f\n", buffer->qw, buffer->qx, buffer->qy, buffer->qz);
+    received_packet(sock, buffer, sizeof(motionPacket));
+    printf("Quaternion: w=%.2f x=%.2f y=%.2f z=%.2f\n", buffer->orientData->qw, buffer->orientData->qx, buffer->orientData->qy, buffer->orientData->qz);
   }
 
   free(buffer);
