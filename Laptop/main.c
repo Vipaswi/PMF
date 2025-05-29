@@ -1,6 +1,7 @@
 #include "UDP_receiver.h"
 #include "imu_packet.h"
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 int main(){
   //setup

@@ -8,7 +8,7 @@ Receive and send data.
 Disconnect.
  */
 
-#include <imu_packet.h>
+#include "imu_packet.h"
 #include <stdio.h> //printing
 #include <stdlib.h>             // processing/controlling memory and memory
 #include <string.h>             // memory deets: memset, memcpy
