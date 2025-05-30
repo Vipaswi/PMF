@@ -12,16 +12,16 @@ func startMotionUpdates(_ socket: Int32) {
             
             // Now send this data over UDP socket (you'll bridge to your C code here)
             // Initialize a C Quaternion struct
-            var orient = Quaternion(qw: Float(quat.w),
+            let orient = Quaternion(qw: Float(quat.w),
                                   qx: Float(quat.x),
                                   qy: Float(quat.y),
                                   qz: Float(quat.z))
             
-            var accel = motion.userAcceleration;
-            var grav = motion.gravity;
-            var rotRate = motion.rotationRate;
+            let accel = motion.userAcceleration;
+            let grav = motion.gravity;
+            let rotRate = motion.rotationRate;
             
-            var imu = IMUPacket(ax: Float(accel.x), ay: Float(accel.y), az: Float(accel.z),
+            let imu = IMUPacket(ax: Float(accel.x), ay: Float(accel.y), az: Float(accel.z),
                                 gx: Float(grav.x), gy: Float(grav.y), gz: Float(grav.z),
                                 mx: Float(rotRate.x), my: Float(rotRate.y), mz: Float(rotRate.z));
             
@@ -31,7 +31,12 @@ func startMotionUpdates(_ socket: Int32) {
             let sent = transmitPacket(socket, &motionPack);
             if sent < 0 {
                 print("Failed to send motion data")
+            } else {
+                print("Motion data sent: Accelx: " + String(accel.x));
             }
+            
         }
+    } else {
+        print("Motion data not available for this device!")
     }
 }

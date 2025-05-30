@@ -8,22 +8,30 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var startSharing = false
+    @State private var socket: Int32 = -1
+
     var body: some View {
         VStack {
-            Button(action: {
-                // Your action here
-                
-            }) {
-                Text("Start Sharing")
-                    .frame(width: 100, height: 150)
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
+            Toggle("Start Sharing", isOn: $startSharing)
+                .padding()
+                .onChange(of: startSharing) { wasoff, isOn in
+                    if isOn {
+                        socket = createSocket()
+                        if socket < 0 {
+                            print("Failed to create socket")
+                        } else {
+                            startMotionUpdates(socket)
+                        }
+                    } else {
+                        closeSocket(socket)
+                        print("Socket closed, sharing ending.")
+                    }
+                }
         }
-        .padding()
     }
 }
+
 
 #Preview {
     ContentView()
