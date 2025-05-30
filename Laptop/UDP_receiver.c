@@ -16,6 +16,8 @@ Disconnect.
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+motionPacket latest_packet;
+
 /**
  * @brief Starts a winsock instance
  * 
@@ -82,8 +84,25 @@ int received_packet(int sock, void* buffer, size_t size){
     struct sockaddr_in clientAddr;
     int addrLen = sizeof(clientAddr);
 
+    printf("called!");
+
     int bytesReceived = recvfrom(sock, (char*)buffer, size, 0,
                                  (struct sockaddr*)&clientAddr, &addrLen);
 
-    return (bytesReceived == SOCKET_ERROR) ? -1 : bytesReceived;
+    if (bytesReceived != SOCKET_ERROR) {
+      latest_packet = *(motionPacket*)buffer;  // Copy AFTER successful receive
+      return bytesReceived;
+    } 
+
+    printf("Failure in retrieval");
+
+    return -1;
+}
+
+/**
+ * @brief Retrieves the latest value of the motionPacket
+ * 
+ */
+const motionPacket* getLatestPacket(){
+  return &latest_packet;
 }

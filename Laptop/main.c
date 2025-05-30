@@ -23,7 +23,7 @@ int main(){
 
   while(1){
     received_packet(sock, buffer, sizeof(motionPacket));
-    printf("Quaternion: w=%.2f x=%.2f y=%.2f z=%.2f\n", buffer->orientData->qw, buffer->orientData->qx, buffer->orientData->qy, buffer->orientData->qz);
+    printf("Quaternion: w=%.2f x=%.2f y=%.2f z=%.2f\n", buffer->orientData.qw, buffer->orientData.qx, buffer->orientData.qy, buffer->orientData.qz);
   }
 
   free(buffer);

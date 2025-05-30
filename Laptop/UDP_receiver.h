@@ -9,10 +9,14 @@
  * 
  */
 #include <stdio.h> //for size_t
+#include "UDP_export.h"
+#include "imu_packet.h"
 
-int startWSA();
-int closeWSA();
-int createSocket();
-int bind_socket(int sock, int port);
-int received_packet(int sock, void* buffer, size_t size);
-int closeSocket(int sock);
+DLL_EXPORT const motionPacket* getLatestPacket();
+
+DLL_EXPORT int startWSA();
+DLL_EXPORT int closeWSA();
+DLL_EXPORT int createSocket();
+DLL_EXPORT int bind_socket(int sock, int port);
+DLL_EXPORT int received_packet(int sock, void* buffer, size_t size);
+DLL_EXPORT int closeSocket(int sock);

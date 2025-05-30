@@ -1,3 +1,6 @@
+#ifndef IMU_PACKET_H
+#define IMU_PACKET_H
+
 // imu_packet.h
 typedef struct {
     float ax, ay, az; //angular accel
@@ -22,3 +25,5 @@ typedef struct{
     IMUPacket rawData; //raw acceleration and velocity data
     Quaternion orientData; //the orientation data
 } motionPacket;
+
+#endif 
