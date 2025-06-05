@@ -1,6 +1,8 @@
 #ifndef IMU_PACKET_H
 #define IMU_PACKET_H
 
+#pragma pack(push, 1)
+
 // imu_packet.h
 typedef struct {
     float ax, ay, az; //angular accel
@@ -26,4 +28,6 @@ typedef struct{
     Quaternion orientData; //the orientation data
 } motionPacket;
 
+
+#pragma pack(pop)
 #endif 

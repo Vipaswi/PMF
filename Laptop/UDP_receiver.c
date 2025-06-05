@@ -15,8 +15,10 @@ Disconnect.
 #include <unistd.h>             // For close (Unix-like systems)
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include "UDP_receiver.h"
+#include <windows.h>
 
-motionPacket latest_packet;
+static motionPacket latest_packet;
 
 /**
  * @brief Starts a winsock instance
@@ -84,16 +86,15 @@ int received_packet(int sock, void* buffer, size_t size){
     struct sockaddr_in clientAddr;
     int addrLen = sizeof(clientAddr);
 
-    printf("called!");
-
     int bytesReceived = recvfrom(sock, (char*)buffer, size, 0,
                                  (struct sockaddr*)&clientAddr, &addrLen);
 
     if (bytesReceived != SOCKET_ERROR) {
       latest_packet = *(motionPacket*)buffer;  // Copy AFTER successful receive
+      printf("[C] getLatestPacket returning address: %p\n", (void*)&latest_packet);
       return bytesReceived;
     } 
-
+    
     printf("Failure in retrieval");
 
     return -1;
@@ -103,6 +104,8 @@ int received_packet(int sock, void* buffer, size_t size){
  * @brief Retrieves the latest value of the motionPacket
  * 
  */
-const motionPacket* getLatestPacket(){
+__declspec(dllexport) const motionPacket* getLatestPacket(){
+  OutputDebugStringA("Called latest packet");
+  OutputDebugStringA((void*)&latest_packet);
   return &latest_packet;
 }

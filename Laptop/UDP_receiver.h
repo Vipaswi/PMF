@@ -12,6 +12,10 @@
 #include "UDP_export.h"
 #include "imu_packet.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 DLL_EXPORT const motionPacket* getLatestPacket();
 
 DLL_EXPORT int startWSA();
@@ -20,3 +24,7 @@ DLL_EXPORT int createSocket();
 DLL_EXPORT int bind_socket(int sock, int port);
 DLL_EXPORT int received_packet(int sock, void* buffer, size_t size);
 DLL_EXPORT int closeSocket(int sock);
+
+#ifdef __cplusplus
+}
+#endif
