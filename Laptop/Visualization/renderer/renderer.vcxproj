@@ -135,6 +135,12 @@
   <ItemGroup>
     <ClCompile Include="HelloTriangleApplication.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="frag.spv" />
+    <None Include="shader.frag" />
+    <None Include="shader.vert" />
+    <None Include="vert.spv" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
