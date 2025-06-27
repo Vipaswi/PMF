@@ -1,0 +1,17 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build artifacts
+*.obj
+*.pdb
+*.ilk
+*.tlog
+*.idb
+*.exe.recipe
+*.lastbuildstate
+
+# Debug binaries
+Debug/
+x64/Debug/

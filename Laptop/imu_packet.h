@@ -1,3 +1,8 @@
+#ifndef IMU_PACKET_H
+#define IMU_PACKET_H
+
+#pragma pack(push, 1)
+
 // imu_packet.h
 typedef struct {
     float ax, ay, az; //angular accel
@@ -12,3 +17,17 @@ typedef struct {
 typedef struct {
     float qw, qx, qy, qz;
 } Quaternion; 
+
+/**
+ * @brief Packet of data that contains both raw data (accel, velocity, and magn. field data),
+ *        and orientation data.
+ * 
+ */
+typedef struct{
+    IMUPacket rawData; //raw acceleration and velocity data
+    Quaternion orientData; //the orientation data
+} motionPacket;
+
+
+#pragma pack(pop)
+#endif 
