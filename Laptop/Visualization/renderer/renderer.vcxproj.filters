@@ -29,10 +29,10 @@
     <None Include="shader.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="frag.spv">
+    <None Include="shaders\frag.spv">
       <Filter>shaders</Filter>
     </None>
-    <None Include="vert.spv">
+    <None Include="shaders\vert.spv">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

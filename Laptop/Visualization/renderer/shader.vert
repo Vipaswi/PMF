@@ -10,6 +10,6 @@ layout(location = 0) out vec3 fragColor;
 void main() {
     //The built-in gl_VertexIndex variable contains the index of the current vertex
     //currently contains dummy z and w values
-    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
-    fragColor = colors[gl_VertexIndex];
+    gl_Position = vec4(inPosition, 0.0, 1.0);
+    fragColor = inColor;
 }
