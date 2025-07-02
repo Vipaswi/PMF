@@ -16,6 +16,9 @@
     <Filter Include="shaders">
       <UniqueIdentifier>{311d5863-0ebf-4ffb-828d-b67845882ce0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="textures">
+      <UniqueIdentifier>{153616c2-5c91-45cd-9cbd-e1ce85096b89}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HelloTriangleApplication.cpp">
@@ -29,11 +32,16 @@
     <None Include="shader.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\frag.spv">
-      <Filter>shaders</Filter>
-    </None>
     <None Include="shaders\vert.spv">
       <Filter>shaders</Filter>
     </None>
+    <None Include="shaders\frag.spv">
+      <Filter>shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\texture.jpg">
+      <Filter>textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>
