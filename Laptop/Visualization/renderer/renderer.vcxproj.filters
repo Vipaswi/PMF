@@ -19,6 +19,9 @@
     <Filter Include="textures">
       <UniqueIdentifier>{153616c2-5c91-45cd-9cbd-e1ce85096b89}</UniqueIdentifier>
     </Filter>
+    <Filter Include="models">
+      <UniqueIdentifier>{d50e4721-6ca2-4f9c-96ad-d101658bb55d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HelloTriangleApplication.cpp">
@@ -32,10 +35,10 @@
     <None Include="shader.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\vert.spv">
+    <None Include="shaders\frag.spv">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\frag.spv">
+    <None Include="shaders\vert.spv">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>
@@ -43,5 +46,13 @@
     <Image Include="textures\texture.jpg">
       <Filter>textures</Filter>
     </Image>
+    <Image Include="textures\viking_room.png">
+      <Filter>textures</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="models\viking_room.obj">
+      <Filter>models</Filter>
+    </Text>
   </ItemGroup>
 </Project>

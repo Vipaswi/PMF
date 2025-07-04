@@ -102,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.313.1\Include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glm-1.0.1;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\stb-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.313.1\Include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glm-1.0.1;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\stb-master;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\tinyobjloader-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.313.1\Include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glm-1.0.1;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\stb-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.313.1\Include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glm-1.0.1;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\stb-master;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\tinyobjloader-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -143,6 +143,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\texture.jpg" />
+    <Image Include="textures\viking_room.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="models\viking_room.obj">
+      <FileType>Document</FileType>
+    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -26,6 +26,17 @@
 #define STB_IMAGE_IMPLEMENTATION // Includes function bodies for header file
 #include <stb_image.h> 
 
+// Depth Buffer: use the vulkan range 0 to 1 instead of openGL range -1 to 1 (by def.)
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE 
+
+// Object Loader
+#define TINYOBJLOADER_IMPLEMENTATION // include source code
+#include <tiny_obj_loader.h>
+#include <unordered_map>
+
+// Hashing vertices:
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 
 const uint32_t WIDTH = 800; // width of the window
 const uint32_t HEIGHT = 600; // height of the window
@@ -77,6 +88,63 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
     }
 }
 
+struct Vertex {
+    glm::vec3 pos;
+    glm::vec3 color;
+    glm::vec2 texCoord;
+
+    // Defines the input-rate and size of vertex data
+    static VkVertexInputBindingDescription getBindingDescription() {
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = 0; // Binding index in binding arr.
+        bindingDescription.stride = sizeof(Vertex); // # bytes bet entries
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;  // When to move data; current: after each vertex
+
+        return bindingDescription;
+    };
+
+    // How to extract vertex attributes from chunks of vertex data from binding descriptions
+    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+        // The binding the per vertex data originates from
+        attributeDescriptions[0].binding = 0;
+        // location directive in the vertex shader input
+        attributeDescriptions[0].location = 0;
+        // Attribute data type:
+            // -> weirdly enough, we use the same formats as colors for vector types (e.g. vec2 = R32G32)
+            // Also silently defines byte size of attribute data
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        // Offset from per-vertex start data to access the param.
+        attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+        // Similarly: 
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+        return attributeDescriptions;
+    };
+
+    bool operator==(const Vertex& other) const {
+        return pos == other.pos && color == other.color && texCoord == other.texCoord;
+    };
+};
+
+namespace std {
+    template<> struct hash<Vertex> {
+        size_t operator()(const Vertex& vertex) const {
+            return ((hash<glm::vec3>()(vertex.pos) ^
+                (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
+                (hash<glm::vec2>()(vertex.texCoord) << 1);
+        }
+    };
+}
+
 
 /// <summary>
 /// The main application, whose private members and functions will interact/store Vulakn Objects.
@@ -105,11 +173,11 @@ private:
         size_t fileSize = (size_t)file.tellg();
         std::vector<char> buffer(fileSize);
 
-		//go back to the start, and read the file into the buffer
+        //go back to the start, and read the file into the buffer
         file.seekg(0);
         file.read(buffer.data(), fileSize);
 
-		//close the file
+        //close the file
         file.close();
 
         //return file character data
@@ -129,49 +197,6 @@ private:
         VkSurfaceCapabilitiesKHR capabilities;
         std::vector<VkSurfaceFormatKHR> formats;
         std::vector<VkPresentModeKHR> presentModes;
-    };
-    
-    struct Vertex {
-		glm::vec2 pos;
-        glm::vec3 color;
-        glm::vec2 texCoord;
-
-        // Defines the input-rate and size of vertex data
-        static VkVertexInputBindingDescription getBindingDescription() {
-            VkVertexInputBindingDescription bindingDescription{};
-            bindingDescription.binding = 0; // Binding index in binding arr.
-            bindingDescription.stride = sizeof(Vertex); // # bytes bet entries
-            bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;  // When to move data; current: after each vertex
-
-            return bindingDescription;
-        };
-
-        // How to extract vertex attributes from chunks of vertex data from binding descriptions
-        static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-            std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-            // The binding the per vertex data originates from
-            attributeDescriptions[0].binding = 0; 
-            // location directive in the vertex shader input
-            attributeDescriptions[0].location = 0; 
-            // Attribute data type:
-			    // -> weirdly enough, we use the same formats as colors for vector types (e.g. vec2 = R32G32)
-                // Also silently defines byte size of attribute data
-            attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT; 
-            // Offset from per-vertex start data to access the param.
-            attributeDescriptions[0].offset = offsetof(Vertex, pos); 
-
-            // Similarly: 
-            attributeDescriptions[1].binding = 0; 
-            attributeDescriptions[1].location = 1;
-            attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-            attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-            attributeDescriptions[2].binding = 0;
-            attributeDescriptions[2].location = 2;
-            attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-            attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-            return attributeDescriptions;
-        };
     };
 
     GLFWwindow* window;
@@ -207,17 +232,12 @@ private:
     bool framebufferResized = false;
     
     // Vectors: position, color
-    const std::vector<Vertex> vertices = {
-        {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-        {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-    };
+    std::vector<Vertex> vertices;
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
 
     // Index Buffer:
-    const std::vector<uint16_t> indices = { 0, 1, 2, 2, 3, 0 };
+    std::vector<uint32_t> indices;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
 
@@ -242,6 +262,15 @@ private:
     VkDeviceMemory textureImageMemory;
     VkImageView textureImageView;
     VkSampler textureSampler;
+
+    // Depth Buffer:
+    VkImage depthImage;
+    VkDeviceMemory depthImageMemory;
+    VkImageView depthImageView;
+
+    // Models
+    const std::string MODEL_PATH = "models/viking_room.obj";
+    const std::string TEXTURE_PATH = "textures/viking_room.png";
 
     void initWindow() {
 		glfwInit(); // Initialize GLFW
@@ -270,11 +299,13 @@ private:
         createRenderPass();
         createDescriptorSetLayout();
 		createGraphicsPipeline(); 
-		createFramebuffers(); 
         createCommandPool();
+        createDepthResources();
+		createFramebuffers(); 
         createTextureImage();
         createTextureImageView();
         createTextureSampler();
+        loadModel();
         createVertexBuffer();
         createIndexBuffer();
         createUniformBuffers();
@@ -334,6 +365,90 @@ private:
         glfwTerminate();
     }
 
+    void loadModel() {
+        // Obj contains positions, normals, textures coords, and faces (arbitrary num of vertices)
+        // -> vertex : position, normal and/or texture coords by index
+
+        //holds all positions, normals, and text. coords
+        tinyobj::attrib_t attrib; 
+
+        //Holds an array of vertices, each with indices of position, normal and texture coords attributes
+        std::vector<tinyobj::shape_t> shapes; 
+        std::vector<tinyobj::material_t> materials;
+        std::string warn, err;
+
+        // LoadObj automatically traingulates faces by default, which is good for our use case.
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
+            throw std::runtime_error(warn + err);
+        }
+
+        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+        for (const auto& shape : shapes) {
+            for (const auto& index : shape.mesh.indices) {
+                Vertex vertex{};
+
+                // Get correct positioning; mult by 3 to get convert float indexes to glm::vec3 indexes
+                vertex.pos = {
+                    attrib.vertices[3 * index.vertex_index + 0],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2],
+                };
+
+                vertex.texCoord = {
+                    attrib.texcoords[2 * index.texcoord_index + 0],
+                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1] //flip vertical component of tex. coords to align with vulkan
+                };
+
+                vertex.color = { 1.0f, 1.0f, 1.0f };
+
+                if (uniqueVertices.count(vertex) == 0) {
+                    uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                    vertices.push_back(vertex);
+                }
+
+                indices.push_back(uniqueVertices[vertex]);
+            }
+        }
+    }
+
+    // Finds a supported format with the given tiling and features
+    VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+        for(VkFormat format: candidates){
+            VkFormatProperties props;
+            vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+
+            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+                return format;
+            }
+            else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+                return format;
+            }
+        }
+
+        throw std::runtime_error("failed to find supported format!");
+    }
+
+    VkFormat findDepthFormat() {
+        return findSupportedFormat({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    }
+
+    bool hasStencilComponent(VkFormat format) {
+        return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+    }
+
+    void createDepthResources() {
+
+        VkFormat depthFormat = findDepthFormat();
+
+        createImage(swapChainExtent.width, swapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
+        depthImageView = createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+        transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    }
+
     /** Texture sampler that can be applied to any image(1D, 2D, or 3D).
     *   
     *   It provides an interface to extract colors from a texture
@@ -385,7 +500,7 @@ private:
     }
 
     void createTextureImageView() {
-        textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+        textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
@@ -434,7 +549,18 @@ private:
 
         // The image that is affected and the specific parts of th eimage:
         barrier.image = image;
-        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        
+        if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+            barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+            if (hasStencilComponent(format)) {
+                barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+            }
+        }
+        else {
+            barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        }
+
         barrier.subresourceRange.baseMipLevel = 0;
         barrier.subresourceRange.levelCount = 1;
         barrier.subresourceRange.baseArrayLayer = 0;
@@ -464,6 +590,13 @@ private:
             sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
             destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         }
+        else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+            sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        } 
         else {
             throw std::invalid_argument("unsupported layout transition!");
         }
@@ -530,7 +663,7 @@ private:
         // Load an image with rgb and alpha channels. Also, fill in the width, height, and actual channels it has
         int texWidth, texHeight, texChannels;
 
-        stbi_uc* pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha); 
+        stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         VkDeviceSize imageSize = texWidth * texHeight * 4; //four bytes per pixel with rgba.
 
         if (!pixels) {
@@ -793,6 +926,10 @@ private:
     }
 
     void cleanupSwapChain() {
+        vkDestroyImageView(device, depthImageView, nullptr);
+        vkDestroyImage(device, depthImage, nullptr);
+        vkFreeMemory(device, depthImageMemory, nullptr);
+
         for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
             vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
         }
@@ -822,6 +959,7 @@ private:
         //Recreate the swap chain, image views, and frame buffers
         createSwapChain();
         createImageViews();
+        createDepthResources();
         createFramebuffers();
     }
 
@@ -1002,10 +1140,12 @@ private:
         renderPassInfo.renderArea.offset = { 0, 0 };
         renderPassInfo.renderArea.extent = swapChainExtent;
 
-        // Black
-        VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
-        renderPassInfo.clearValueCount = 1;
-        renderPassInfo.pClearValues = &clearColor;
+        // Clear values; needs to be the same as the attachment order
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+        clearValues[1].depthStencil = { 1.0f, 0 };
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
 
         vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -1031,7 +1171,7 @@ private:
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-        vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
 
@@ -1078,15 +1218,17 @@ private:
     void createFramebuffers() {
         swapChainFramebuffers.resize(swapChainImageViews.size());
         for (size_t i = 0; i < swapChainImageViews.size(); i++) {
-            VkImageView attachments[] = {
-            swapChainImageViews[i]
+            std::array<VkImageView, 2> attachments = {
+                swapChainImageViews[i],
+                depthImageView
             };
+
 
             VkFramebufferCreateInfo framebufferInfo{};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferInfo.renderPass = renderPass;
-            framebufferInfo.attachmentCount = 1;
-            framebufferInfo.pAttachments = attachments;
+            framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+            framebufferInfo.pAttachments = attachments.data();
             framebufferInfo.width = swapChainExtent.width;
             framebufferInfo.height = swapChainExtent.height;
             framebufferInfo.layers = 1;
@@ -1126,29 +1268,45 @@ private:
         colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; 
 
+        VkAttachmentDescription depthAttachment{};
+        depthAttachment.format = findDepthFormat();
+        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // no longer used after drawing is finished
+        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
         VkAttachmentReference colorAttachmentRef{};
 		colorAttachmentRef.attachment = 0; //index of the attachment in the render pass
         colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentReference depthAttachmentRef{};
+        depthAttachmentRef.attachment = 1;
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkSubpassDescription subpass{};
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount = 1;
         subpass.pColorAttachments = &colorAttachmentRef;
+        subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
+        std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
         VkRenderPassCreateInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.attachmentCount = 1;
-        renderPassInfo.pAttachments = &colorAttachment;
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.pAttachments = attachments.data();
         renderPassInfo.subpassCount = 1;
         renderPassInfo.pSubpasses = &subpass;
 
         VkSubpassDependency dependency{};
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL; // Refers to implicit subpasses prior to and after a subpass
         dependency.dstSubpass = 0; // The only subpass; dst > src unlss src = vk_subpass_external
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; //stage to wait on 
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT; //stage to wait on 
         dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
 		// The dependency ensures that the color attachment is written to before the subpass begins
         renderPassInfo.dependencyCount = 1;
@@ -1294,6 +1452,19 @@ private:
        colorBlending.blendConstants[2] = 0.0f; // Optional
        colorBlending.blendConstants[3] = 0.0f; // Optional
 
+       // Depth Stencil
+       VkPipelineDepthStencilStateCreateInfo depthStencil{};
+       depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+       depthStencil.depthTestEnable = VK_TRUE; // Compare to depths in depth buffer?
+       depthStencil.depthWriteEnable = VK_TRUE; // new values written to depth buffer?
+       depthStencil.depthCompareOp = VK_COMPARE_OP_LESS; // depth of new fragments is less
+       depthStencil.depthBoundsTestEnable = VK_FALSE; // depths within a bound?
+       depthStencil.minDepthBounds = 0.0f; // Optional
+       depthStencil.maxDepthBounds = 1.0f; // Optional
+       depthStencil.stencilTestEnable = VK_FALSE; //Stencil stuff
+       depthStencil.front = {}; // Optional
+       depthStencil.back = {}; // Optional
+
        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
        pipelineLayoutInfo.setLayoutCount = 1; 
@@ -1326,6 +1497,8 @@ private:
        pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
        pipelineInfo.basePipelineIndex = -1; // Optional
 
+       pipelineInfo.pDepthStencilState = &depthStencil;
+
        if(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
            throw std::runtime_error("failed to create graphics pipeline!");
 	   }
@@ -1355,13 +1528,13 @@ private:
 	   return shaderModule; //return the created shader module
    }
 
-   VkImageView createImageView(VkImage image, VkFormat format) {
+   VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {
        VkImageViewCreateInfo viewInfo{};
        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
        viewInfo.image = image;
        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
        viewInfo.format = format;
-       viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+       viewInfo.subresourceRange.aspectMask = aspectFlags;
        viewInfo.subresourceRange.baseMipLevel = 0;
        viewInfo.subresourceRange.levelCount = 1;
        viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -1379,7 +1552,7 @@ private:
     void createImageViews() {
         swapChainImageViews.resize(swapChainImages.size()); 
         for (size_t i = 0; i < swapChainImages.size(); i++) {
-            swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat);
+            swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
         }
 
     }
