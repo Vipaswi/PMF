@@ -1132,14 +1132,12 @@ private:
 
         // Quaternion data 
         motionPacket packetData = *getRecentQuaternionData();
-        // Flip q
-        glm::quat q(packetData.orientData.qw, -packetData.orientData.qz, packetData.orientData.qy , -packetData.orientData.qx);
-        glm::normalize(q);
-        
-        // Simple rotation around the z axis using the time variable:
+        glm::quat q(packetData.orientData.qw, packetData.orientData.qy, packetData.orientData.qx, -packetData.orientData.qz); //yxz ~kind of working. -> nvm.
+        glm::quat alignment = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        printf("x: %.2f, y: %.2f, z: %.2f \n", packetData.orientData.qy, packetData.orientData.qx, packetData.orientData.qz);
         UniformBufferObject ubo{};
             // -> Take the existing quaternion and transform it to match sword standards
-        ubo.model = glm::mat4_cast(q);
+        ubo.model = glm::mat4_cast(q * alignment);
 
         // View transofrmation to look at the geometry from 45 deg. above
             // -> params: eye position, center position, and up axis (2,2,2 makes equilateral triangle so deg. is 45)
