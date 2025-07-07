@@ -102,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.313.1\Include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glm-1.0.1;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\stb-master;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\tinyobjloader-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.313.1\Include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glm-1.0.1;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\stb-master;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\tinyobjloader-release;C:\Users\kakas\OneDrive\Documents\Projects\PMF\Laptop\Receiver;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -110,7 +110,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.4.313.1\Lib;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.313.1\Include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glm-1.0.1;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\stb-master;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\tinyobjloader-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.313.1\Include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glm-1.0.1;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\stb-master;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\tinyobjloader-release;C:\Users\kakas\OneDrive\Documents\Projects\PMF\Laptop\Receiver;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -129,7 +129,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.4.313.1\Lib;C:\Users\kakas\OneDrive\Documents\Projects\Libraries\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -142,11 +142,17 @@
     <None Include="shaders\vert.spv" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="textures\sword_tex.png" />
     <Image Include="textures\texture.jpg" />
     <Image Include="textures\viking_room.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="models\viking_room.obj">
+      <FileType>Document</FileType>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="models\Greatsword_Dragon.obj">
       <FileType>Document</FileType>
     </Text>
   </ItemGroup>

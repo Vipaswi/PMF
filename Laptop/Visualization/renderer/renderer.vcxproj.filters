@@ -49,9 +49,15 @@
     <Image Include="textures\viking_room.png">
       <Filter>textures</Filter>
     </Image>
+    <Image Include="textures\sword_tex.png">
+      <Filter>textures</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="models\viking_room.obj">
+      <Filter>models</Filter>
+    </Text>
+    <Text Include="models\Greatsword_Dragon.obj">
       <Filter>models</Filter>
     </Text>
   </ItemGroup>

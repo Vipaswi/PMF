@@ -1,0 +1,1 @@
+int getQuaternionData(void *data);
